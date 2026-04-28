@@ -6,7 +6,8 @@
 
 import feedparser
 import json
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+import email.utils
 
 # 제목에 반드시 포함돼야 하는 핵심 키워드
 CORE_KEYWORDS = [
@@ -55,9 +56,29 @@ RSS_SOURCES = [
 ]
 
 
+MAX_AGE_DAYS = 14  # 이 기간보다 오래된 기사는 제외
+
+
+def parse_date(date_str: str) -> datetime | None:
+    if not date_str:
+        return None
+    try:
+        t = email.utils.parsedate_to_datetime(date_str)
+        return t.astimezone(timezone.utc)
+    except Exception:
+        pass
+    for fmt in ("%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(date_str[:19], fmt).replace(tzinfo=timezone.utc)
+        except ValueError:
+            continue
+    return None
+
+
 def collect(max_posts: int = 15) -> list[dict]:
-    """여러 소스에서 최신 피싱 뉴스 수집 (소스별 균등 수집)"""
+    """여러 소스에서 최신 피싱 뉴스 수집 (소스별 균등 수집, 7일 이내만)"""
     print(f"[{datetime.now()}] 피해사례 수집 시작...")
+    cutoff = datetime.now(timezone.utc) - timedelta(days=MAX_AGE_DAYS)
 
     per_source = max(max_posts // len(RSS_SOURCES), 3)
     seen_titles = set()
@@ -76,6 +97,10 @@ def collect(max_posts: int = 15) -> list[dict]:
                 title = entry.get("title", "").strip()
                 content = entry.get("summary", "")
                 if not title or title in seen_titles:
+                    continue
+                pub_date = parse_date(entry.get("published", ""))
+                if pub_date and pub_date < cutoff:
+                    print(f"  ⏭️ 오래된 기사 제외: {title[:30]}... ({entry.get('published', '')[:10]})")
                     continue
                 if not is_phishing_related(title, content):
                     continue
