@@ -10,28 +10,30 @@ from datetime import datetime
 
 # 제목에 반드시 포함돼야 하는 핵심 키워드
 CORE_KEYWORDS = [
-    # 피싱 유형
     "피싱", "보이스피싱", "스미싱", "파밍", "메신저피싱",
-    # 사기 유형
     "사기문자", "사기 문자", "사기전화", "사기 전화",
     "금융사기", "대출사기", "택배사기", "전화사기",
-    "카카오톡 사기", "카카오톡사기", "문자사기",
+    "전화금융사기", "문자사기", "카카오톡사기",
     "정부지원금 사기", "정부지원금사기",
-    # 수법
-    "사칭", "악성앱", "악성 앱", "랜섬웨어",
-    "개인정보 탈취", "개인정보탈취", "계좌 탈취",
+    "악성앱", "악성 앱", "랜섬웨어",
+    "개인정보 탈취", "개인정보탈취",
     "불법 대출", "불법대출", "스팸문자",
-    # 피해/주의
     "사기 피해", "사기피해", "피싱 피해",
-    "피해 주의", "피해주의", "사기 주의", "사기주의",
-    "보이스피싱 주의", "스미싱 주의",
-    # 해킹/보안
-    "해킹 피해", "해킹피해", "개인정보 유출", "개인정보유출",
+    "해킹 피해", "해킹피해", "개인정보 유출",
 ]
+
+SECONDARY_TITLE_KEYWORDS = ["사기", "피해", "사칭", "해킹", "피싱"]
 
 
 def is_phishing_related(title: str, content: str) -> bool:
-    return any(kw in title for kw in CORE_KEYWORDS)
+    # 1단계: 제목에 핵심 키워드
+    if any(kw in title for kw in CORE_KEYWORDS):
+        return True
+    # 2단계: 제목에 일반 사기 관련어 + 내용에 핵심 키워드
+    if any(kw in title for kw in SECONDARY_TITLE_KEYWORDS):
+        if any(kw in content for kw in CORE_KEYWORDS):
+            return True
+    return False
 
 RSS_SOURCES = [
     # 연합뉴스 - 사회
