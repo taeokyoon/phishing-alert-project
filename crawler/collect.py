@@ -8,6 +8,24 @@ import feedparser
 import json
 from datetime import datetime
 
+# 제목에 반드시 포함돼야 하는 핵심 키워드
+CORE_KEYWORDS = [
+    "피싱", "보이스피싱", "스미싱", "파밍",
+    "사기문자", "사기전화", "사기 문자", "사기 전화",
+    "메신저피싱", "금융사기", "대출사기", "택배사기",
+    "개인정보 탈취", "개인정보탈취", "악성앱", "악성 앱",
+    "카카오톡 사기", "카카오톡사기", "계좌이체 사기",
+    "정부지원금 사기", "사칭 문자", "사칭문자",
+    "피해 주의", "피해주의", "사기 피해", "사기피해",
+    "보안 경고", "보안경고", "해킹 피해", "해킹피해",
+    "랜섬웨어", "스팸문자", "불법 대출", "불법대출",
+]
+
+
+def is_phishing_related(title: str, content: str) -> bool:
+    # 제목에 핵심 키워드가 있어야 통과
+    return any(kw in title for kw in CORE_KEYWORDS)
+
 RSS_SOURCES = [
     # 구글 뉴스 - 보이스피싱/스미싱 (로컬 환경에서 작동)
     "https://news.google.com/rss/search?q=보이스피싱+스미싱&gl=KR&hl=ko&ceid=KR:ko",
@@ -51,7 +69,10 @@ def collect(max_posts: int = 15) -> list[dict]:
                 if count >= per_source:
                     break
                 title = entry.get("title", "").strip()
+                content = entry.get("summary", "")
                 if not title or title in seen_titles:
+                    continue
+                if not is_phishing_related(title, content):
                     continue
                 seen_titles.add(title)
                 results.append({
