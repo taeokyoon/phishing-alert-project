@@ -21,20 +21,23 @@ RSS_SOURCES = [
 
 
 def collect(max_posts: int = 15) -> list[dict]:
-    """여러 소스에서 최신 피싱 뉴스 수집"""
+    """여러 소스에서 최신 피싱 뉴스 수집 (소스별 균등 수집)"""
     print(f"[{datetime.now()}] 피해사례 수집 시작...")
 
+    per_source = max(max_posts // len(RSS_SOURCES), 3)
     seen_titles = set()
     results = []
 
     for rss_url in RSS_SOURCES:
         try:
             feed = feedparser.parse(rss_url)
+            count = 0
             for entry in feed.entries:
+                if count >= per_source:
+                    break
                 title = entry.get("title", "").strip()
                 if not title or title in seen_titles:
                     continue
-
                 seen_titles.add(title)
                 results.append({
                     "title": title,
@@ -43,15 +46,11 @@ def collect(max_posts: int = 15) -> list[dict]:
                     "content": entry.get("summary", "")
                 })
                 print(f"  ✅ 수집: {title[:30]}...")
-
-                if len(results) >= max_posts:
-                    break
+                count += 1
         except Exception as e:
             print(f"  ⚠️ {rss_url[:40]} 수집 실패: {e}")
 
-        if len(results) >= max_posts:
-            break
-
+    results = results[:max_posts]
     print(f"  총 {len(results)}개 뉴스 수집")
 
     with open("data/raw_cases.json", "w", encoding="utf-8") as f:

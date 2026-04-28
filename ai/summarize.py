@@ -7,7 +7,6 @@
 import re
 import json
 import os
-from dotenv import load_dotenv
 from groq import Groq
 
 
@@ -85,7 +84,6 @@ def summarize_case(title: str, content: str) -> str:
 def process_all(input_path: str = "data/raw_cases.json",
                 output_path: str = "data/summarized.json"):
     """전체 사례 요약 처리"""
-    load_dotenv()
     with open(input_path, encoding="utf-8") as f:
         cases = json.load(f)
 

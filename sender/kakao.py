@@ -8,7 +8,6 @@
 import json
 import datetime
 import os
-import requests
 
 
 def build_message(summary: str) -> dict:

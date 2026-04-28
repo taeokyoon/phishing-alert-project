@@ -16,8 +16,8 @@ groq
 # flask - kakao.py - 카카오 스킬 서버
 flask
 
-# schedule - scheduler.py 매일 자동 실행
-schedule
+# gunicorn - Render 프로덕션 서버
+gunicorn
 
 # .env 파일로 key 관리
 python-dotenv

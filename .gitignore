@@ -2,3 +2,7 @@
 .env
 __pycache__/
 *.pyc
+
+# Render 배포 시 자동 생성되는 데이터 파일
+data/raw_cases.json
+data/summarized.json
