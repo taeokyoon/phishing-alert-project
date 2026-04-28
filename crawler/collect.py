@@ -82,6 +82,7 @@ def collect(max_posts: int = 15) -> list[dict]:
 
     per_source = max(max_posts // len(RSS_SOURCES), 3)
     seen_titles = set()
+    seen_links = set()
     results = []
 
     USER_AGENT = "Mozilla/5.0 (compatible; PhishingAlertBot/1.0)"
@@ -96,7 +97,8 @@ def collect(max_posts: int = 15) -> list[dict]:
                     break
                 title = entry.get("title", "").strip()
                 content = entry.get("summary", "")
-                if not title or title in seen_titles:
+                link = entry.get("link", "")
+                if not title or title in seen_titles or (link and link in seen_links):
                     continue
                 pub_date = parse_date(entry.get("published", ""))
                 if pub_date and pub_date < cutoff:
@@ -105,9 +107,11 @@ def collect(max_posts: int = 15) -> list[dict]:
                 if not is_phishing_related(title, content):
                     continue
                 seen_titles.add(title)
+                if link:
+                    seen_links.add(link)
                 results.append({
                     "title": title,
-                    "link": entry.get("link", ""),
+                    "link": link,
                     "date": entry.get("published", ""),
                     "content": entry.get("summary", "")
                 })
