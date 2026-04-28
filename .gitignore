@@ -3,6 +3,5 @@
 __pycache__/
 *.pyc
 
-# Render 배포 시 자동 생성되는 데이터 파일
+# 수집 중간 파일 (Actions에서 생성, 커밋 불필요)
 data/raw_cases.json
-data/summarized.json
