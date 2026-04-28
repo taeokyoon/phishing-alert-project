@@ -11,13 +11,13 @@ from groq import Groq
 
 
 def clean_text(text: str) -> str:
-    """한자, 키릴 문자, 라틴 문자 등 비한글 제거"""
+    """한자, 키릴 문자 등 비한글 제거 (이모지·숫자·문장부호 보존)"""
     # 한자 제거
     text = re.sub(r'[一-鿿㐀-䶿]+', '', text)
-    # 키릴 문자 제거 (лич 등)
+    # 키릴 문자 제거
     text = re.sub(r'[Ѐ-ӿ]+', '', text)
-    # 한글, 숫자, 이모지, 기본 문장부호, 공백만 허용
-    text = re.sub(r'[a-zA-Z]+', '', text)
+    # 한글 문장 중간에 끼어든 영문자만 제거 (숫자·이모지·문장부호는 유지)
+    text = re.sub(r'(?<=[가-힣\s])[a-zA-Z]+(?=[가-힣\s])', '', text)
     # 연속 공백 정리
     text = re.sub(r' {2,}', ' ', text)
     return text.strip()
