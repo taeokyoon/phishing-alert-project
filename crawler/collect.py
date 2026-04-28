@@ -9,20 +9,12 @@ import json
 from datetime import datetime
 
 RSS_SOURCES = [
-    # 구글 뉴스 - 보이스피싱/스미싱
+    # 구글 뉴스 - 보이스피싱/스미싱 (로컬 환경에서 작동)
     "https://news.google.com/rss/search?q=보이스피싱+스미싱&gl=KR&hl=ko&ceid=KR:ko",
-    # 구글 뉴스 - 금융사기
     "https://news.google.com/rss/search?q=금융사기+피싱+사기문자&gl=KR&hl=ko&ceid=KR:ko",
-    # 구글 뉴스 - 택배/정부지원금 사기
     "https://news.google.com/rss/search?q=택배사기+정부지원금+사기문자&gl=KR&hl=ko&ceid=KR:ko",
-    # 구글 뉴스 - 카카오톡/SNS 사기
     "https://news.google.com/rss/search?q=카카오톡사기+SNS사기+메신저피싱&gl=KR&hl=ko&ceid=KR:ko",
-    # 구글 뉴스 - 대출사기/개인정보탈취
     "https://news.google.com/rss/search?q=대출사기+개인정보탈취+악성앱&gl=KR&hl=ko&ceid=KR:ko",
-    # 금융감독원 보도자료 RSS
-    "https://www.fss.or.kr/fss/rss/rssNewsView.do?rssType=press",
-    # KISA 인터넷보호나라 보안공지 RSS
-    "https://www.kisa.or.kr/rss/notice.do",
     # 연합뉴스 - 사회
     "https://www.yna.co.kr/rss/society.xml",
     # 연합뉴스 - 경제
@@ -33,6 +25,10 @@ RSS_SOURCES = [
     "https://www.mk.co.kr/rss/50400012/",
     # 한국경제 - 전체
     "https://www.hankyung.com/feed/all-news",
+    # 금융감독원 보도자료 RSS
+    "https://www.fss.or.kr/fss/rss/rssNewsView.do?rssType=press",
+    # KISA 인터넷보호나라 보안공지 RSS
+    "https://www.kisa.or.kr/rss/notice.do",
 ]
 
 
@@ -44,9 +40,12 @@ def collect(max_posts: int = 15) -> list[dict]:
     seen_titles = set()
     results = []
 
+    USER_AGENT = "Mozilla/5.0 (compatible; PhishingAlertBot/1.0)"
+
     for rss_url in RSS_SOURCES:
         try:
-            feed = feedparser.parse(rss_url)
+            feed = feedparser.parse(rss_url, agent=USER_AGENT)
+            print(f"  [{rss_url[:40]}] 상태: {feed.status if hasattr(feed, 'status') else 'N/A'}, 항목 수: {len(feed.entries)}")
             count = 0
             for entry in feed.entries:
                 if count >= per_source:
