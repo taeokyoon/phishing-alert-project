@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(pip show *)",
+      "PowerShell(pip install *)",
+      "WebSearch"
+    ]
+  }
+}

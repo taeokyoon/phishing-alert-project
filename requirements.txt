@@ -1,0 +1,23 @@
+# collect.py - 구글 뉴스 RSS 파싱
+feedparser
+
+# collect.py 금감원 웹 크롤링 http 요청
+requests
+
+# collect.py html 파싱
+beautifulsoup4
+
+# beautifulsoup4 파서 (html.parser 대체, 속도향상)
+lxml
+
+# summarize.py - claude API 클라이언트
+groq
+
+# flask - kakao.py - 카카오 스킬 서버
+flask
+
+# schedule - scheduler.py 매일 자동 실행
+schedule
+
+# .env 파일로 key 관리
+python-dotenv
