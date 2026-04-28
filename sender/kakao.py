@@ -100,6 +100,10 @@ def create_skill_server():
     app = Flask(__name__)
     state = {"offset": 0}  # 다음 사례 offset
 
+    @app.route("/health", methods=["GET"])
+    def health():
+        return "OK", 200
+
     @app.route("/skill", methods=["POST"])
     def skill():
         body = request.get_json()
