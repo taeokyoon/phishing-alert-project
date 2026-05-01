@@ -86,8 +86,7 @@ def load_summary(path: str = "data/summarized.json", offset: int = 0) -> str:
         with open(path, encoding="utf-8") as f:
             cases = json.load(f)
         if cases:
-            base = datetime.date.today().toordinal()
-            index = (base + offset) % len(cases)
+            index = offset % len(cases)
             return cases[index]["summary"]
     except FileNotFoundError:
         pass
