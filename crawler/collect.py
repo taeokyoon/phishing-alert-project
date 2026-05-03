@@ -56,7 +56,7 @@ RSS_SOURCES = [
 ]
 
 
-MAX_AGE_DAYS = 3   # 이 기간보다 오래된 기사는 제외
+MAX_AGE_DAYS = 7   # 이 기간보다 오래된 기사는 제외
 
 
 def parse_date(date_str: str) -> datetime | None:
