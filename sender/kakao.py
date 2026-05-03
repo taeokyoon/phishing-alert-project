@@ -16,6 +16,7 @@ def build_message(summary: str) -> dict:
         "template": {
             "outputs": [{"simpleText": {"text": summary}}],
             "quickReplies": [
+                {"label": "🆕 오늘의 피싱", "action": "message", "messageText": "오늘의피싱"},
                 {"label": "➡️ 다음 사례", "action": "message", "messageText": "다음사례"},
                 {"label": "🛡️ 예방 팁", "action": "message", "messageText": "예방팁"},
                 {"label": "📞 신고전화", "action": "message", "messageText": "신고전화"},
@@ -119,7 +120,7 @@ def create_skill_server():
             summary = load_summary(offset=state["offset"])
             return jsonify(build_message(summary))
 
-        if utterance in ("오늘사례", "처음으로") or any(
+        if utterance in ("오늘사례", "처음으로", "오늘의피싱") or any(
             kw in utterance for kw in ["피싱", "사기", "주의보", "사례", "알려줘"]
         ):
             state["offset"] = 0
