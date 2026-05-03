@@ -57,31 +57,6 @@ RSS_SOURCES = [
 
 
 MAX_AGE_DAYS = 3   # 이 기간보다 오래된 기사는 제외
-SEEN_LINKS_PATH = "data/seen_links.json"
-MAX_SEEN = 500  # seen_links 최대 보관 수 (오래된 것부터 제거)
-
-
-def load_seen_links() -> set:
-    try:
-        with open(SEEN_LINKS_PATH, encoding="utf-8") as f:
-            return set(json.load(f))
-    except FileNotFoundError:
-        return set()
-
-
-def save_seen_links(seen: set, new_links: list):
-    """기존 seen에 new_links 추가 후 저장 (MAX_SEEN 초과 시 오래된 것 제거)"""
-    existing = []
-    try:
-        with open(SEEN_LINKS_PATH, encoding="utf-8") as f:
-            existing = json.load(f)
-    except FileNotFoundError:
-        pass
-    combined = existing + [l for l in new_links if l not in seen]
-    if len(combined) > MAX_SEEN:
-        combined = combined[-MAX_SEEN:]
-    with open(SEEN_LINKS_PATH, "w", encoding="utf-8") as f:
-        json.dump(combined, f, ensure_ascii=False, indent=2)
 
 
 def parse_date(date_str: str) -> datetime | None:
@@ -101,14 +76,13 @@ def parse_date(date_str: str) -> datetime | None:
 
 
 def collect(max_posts: int = 15) -> list[dict]:
-    """여러 소스에서 최신 피싱 뉴스 수집 (소스별 균등 수집, 7일 이내 + 신규 기사만)"""
+    """여러 소스에서 최신 피싱 뉴스 수집 (소스별 균등 수집, 3일 이내만)"""
     print(f"[{datetime.now()}] 피해사례 수집 시작...")
     cutoff = datetime.now(timezone.utc) - timedelta(days=MAX_AGE_DAYS)
 
     per_source = max(max_posts // len(RSS_SOURCES), 3)
     seen_titles = set()
-    already_collected = load_seen_links()  # 이전 실행에서 수집된 링크
-    new_links = []
+    seen_links = set()
     results = []
 
     USER_AGENT = "Mozilla/5.0 (compatible; PhishingAlertBot/1.0)"
@@ -124,10 +98,7 @@ def collect(max_posts: int = 15) -> list[dict]:
                 title = entry.get("title", "").strip()
                 content = entry.get("summary", "")
                 link = entry.get("link", "")
-                if not title or title in seen_titles:
-                    continue
-                if link and link in already_collected:
-                    print(f"  ⏭️ 이미 수집된 기사 제외: {title[:30]}...")
+                if not title or title in seen_titles or (link and link in seen_links):
                     continue
                 pub_date = parse_date(entry.get("published", ""))
                 if pub_date and pub_date < cutoff:
@@ -137,7 +108,7 @@ def collect(max_posts: int = 15) -> list[dict]:
                     continue
                 seen_titles.add(title)
                 if link:
-                    new_links.append(link)
+                    seen_links.add(link)
                 results.append({
                     "title": title,
                     "link": link,
@@ -150,9 +121,7 @@ def collect(max_posts: int = 15) -> list[dict]:
             print(f"  ⚠️ {rss_url[:40]} 수집 실패: {e}")
 
     results = results[:max_posts]
-    print(f"  총 {len(results)}개 신규 뉴스 수집")
-
-    save_seen_links(already_collected, new_links)
+    print(f"  총 {len(results)}개 뉴스 수집")
 
     with open("data/raw_cases.json", "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)

@@ -113,47 +113,31 @@ def summarize_case(title: str, content: str) -> str:
     return proofread_korean(result)
 
 
-MAX_SUMMARIZED = 30  # summarized.json 최대 보관 건수
-
-
 def process_all(input_path: str = "data/raw_cases.json",
                 output_path: str = "data/summarized.json"):
-    """전체 사례 요약 처리 (기존 내용에 누적, 최대 MAX_SUMMARIZED건 유지)"""
+    """전체 사례 요약 처리 (매일 덮어쓰기)"""
     with open(input_path, encoding="utf-8") as f:
         cases = json.load(f)
 
     if not cases:
-        print("[건너뜀] 신규 수집 기사 없음 → summarized.json 유지")
+        print("[건너뜀] 수집 기사 없음 → summarized.json 유지")
         return []
 
-    existing = []
-    try:
-        with open(output_path, encoding="utf-8") as f:
-            existing = json.load(f)
-    except FileNotFoundError:
-        pass
-
-    existing_titles = {item["title"] for item in existing}
-    new_results = []
+    results = []
     for case in cases:
-        if case["title"] in existing_titles:
-            continue
         print(f"  요약 중: {case['title'][:30]}...")
         summary = summarize_case(case["title"], case.get("content", ""))
-        new_results.append({
+        results.append({
             "title": case["title"],
             "date": case.get("date", ""),
             "summary": summary
         })
 
-    combined = new_results + existing  # 신규를 앞에 추가
-    combined = combined[:MAX_SUMMARIZED]
-
     with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(combined, f, ensure_ascii=False, indent=2)
+        json.dump(results, f, ensure_ascii=False, indent=2)
 
-    print(f"[완료] 신규 {len(new_results)}개 추가, 총 {len(combined)}개 → {output_path}")
-    return new_results
+    print(f"[완료] {len(results)}개 저장 → {output_path}")
+    return results
 
 
 if __name__ == "__main__":
