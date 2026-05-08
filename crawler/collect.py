@@ -37,22 +37,18 @@ def is_phishing_related(title: str, content: str) -> bool:
     return False
 
 RSS_SOURCES = [
-    # 구글 뉴스 - 보이스피싱/스미싱
-    "https://news.google.com/rss/search?q=보이스피싱+스미싱&gl=KR&hl=ko&ceid=KR:ko",
-    # 구글 뉴스 - 금융사기
-    "https://news.google.com/rss/search?q=금융사기+피싱+사기문자&gl=KR&hl=ko&ceid=KR:ko",
-    # 구글 뉴스 - 택배/정부지원금 사기
-    "https://news.google.com/rss/search?q=택배사기+정부지원금+사기문자&gl=KR&hl=ko&ceid=KR:ko",
-    # 구글 뉴스 - 카카오톡/SNS 사기
-    "https://news.google.com/rss/search?q=카카오톡사기+SNS사기+메신저피싱&gl=KR&hl=ko&ceid=KR:ko",
-    # 구글 뉴스 - 대출사기/개인정보탈취
-    "https://news.google.com/rss/search?q=대출사기+개인정보탈취+악성앱&gl=KR&hl=ko&ceid=KR:ko",
-    # 연합뉴스 - 사회 (보조)
+    # 보안뉴스 - 피싱/사기 전문 보안 매체
+    "https://www.boannews.com/media/news_rss.asp",
+    # 데일리시큐 - 보안 전문 매체
+    "https://www.dailysecu.com/rss/allArticle.xml",
+    # 연합뉴스 - 사회 (보이스피싱 사건 기사 포함)
     "https://www.yna.co.kr/rss/society.xml",
-    # 매일경제 - 사회 (보조)
-    "https://www.mk.co.kr/rss/30100041/",
-    # KISA 인터넷보호나라 보안공지 RSS
-    "https://www.kisa.or.kr/rss/notice.do",
+    # 뉴시스 - 사회 (금융사기 기사 포함)
+    "https://newsis.com/RSS/society.xml",
+    # 구글 뉴스 - 보이스피싱 (URL 인코딩, 보조)
+    "https://news.google.com/rss/search?q=%EB%B3%B4%EC%9D%B4%EC%8A%A4%ED%94%BC%EC%8B%B1+%EC%8A%A4%EB%AF%B8%EC%8B%B1&gl=KR&hl=ko&ceid=KR:ko",
+    # 구글 뉴스 - 피싱 사기문자 (URL 인코딩, 보조)
+    "https://news.google.com/rss/search?q=%ED%94%BC%EC%8B%B1+%EC%82%AC%EA%B8%B0%EB%AC%B8%EC%9E%90&gl=KR&hl=ko&ceid=KR:ko",
 ]
 
 
