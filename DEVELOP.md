@@ -38,11 +38,11 @@
 │   └── summarized.json   # AI 요약 결과 (자동 생성)
 ├── db/
 │   └── subscribers.json  # 구독자 정보
-├── start_server.py        # Render 배포 진입점 (수집 + 서버 시작)
-├── main.py                # 로컬 데이터 수집 전용
+├── start_server.py        # 로컬 개발용 서버 실행 (Render는 Procfile gunicorn 사용)
+├── main.py                # 로컬/GitHub Actions 데이터 수집 전용
 ├── run.bat                # 로컬 실행용 배치 파일
 ├── update_data.bat        # 로컬 데이터 갱신용 배치 파일
-├── Procfile               # Render 배포 설정
+├── Procfile               # Render 배포 설정 (gunicorn sender.kakao:app)
 ├── requirements.txt
 └── .env                   # GROQ_API_KEY (git 제외)
 ```

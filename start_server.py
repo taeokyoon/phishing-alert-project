@@ -1,7 +1,11 @@
-"""Render 배포용 시작 스크립트: Flask 서버만 시작 (데이터는 GitHub Actions에서 수집)"""
+"""로컬 개발용 서버 실행 스크립트 (Render는 Procfile의 gunicorn 사용)"""
 import os
 from dotenv import load_dotenv
-from sender.kakao import create_skill_server
 
 load_dotenv()
-create_skill_server()
+
+from sender.kakao import app
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)

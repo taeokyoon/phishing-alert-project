@@ -1,26 +1,26 @@
-# AI 요약 변환
-
-"""
-수집된 피싱 사례를 고령층 눈높이에 맞게 AI로 요약
-"""
+"""수집된 피싱 사례를 고령층 눈높이에 맞게 AI로 요약"""
 
 import re
 import json
 import os
 from groq import Groq
 
+_client: Groq | None = None
+
+
+def _get_client() -> Groq:
+    global _client
+    if _client is None:
+        _client = Groq(api_key=os.environ["GROQ_API_KEY"])
+    return _client
+
 
 def clean_text(text: str) -> str:
     """한자, 키릴 문자, 베트남어 등 비한글 제거 (이모지·숫자·문장부호 보존)"""
-    # 한자 제거
     text = re.sub(r'[一-鿿㐀-䶿]+', '', text)
-    # 키릴 문자 제거
     text = re.sub(r'[Ѐ-ӿ]+', '', text)
-    # 베트남어 특수 발음 기호 포함 단어 제거
     text = re.sub(r'\b[a-zA-ZÀ-ỹ]*[àáâãèéêìíòóôõùúýăđơưạảấầẩẫậắặằẳẵẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚÝĂĐƠƯ][a-zA-ZÀ-ỹ]*\b', '', text)
-    # 한글 문장 중간에 끼어든 영문자만 제거 (숫자·이모지·문장부호는 유지)
     text = re.sub(r'(?<=[가-힣\s])[a-zA-Z]+(?=[가-힣\s])', '', text)
-    # 연속 공백 정리
     text = re.sub(r' {2,}', ' ', text)
     return text.strip()
 
@@ -82,8 +82,7 @@ USER_PROMPT_TEMPLATE = """아래 피싱 뉴스를 어르신도 쉽게 이해할 
 
 def proofread_korean(text: str) -> str:
     """1차 요약된 텍스트의 한국어 문법/어순 교정"""
-    client = Groq(api_key=os.environ["GROQ_API_KEY"])
-    completion = client.chat.completions.create(
+    completion = _get_client().chat.completions.create(
         model="llama-3.3-70b-versatile",
         temperature=0.1,
         messages=[
@@ -96,9 +95,7 @@ def proofread_korean(text: str) -> str:
 
 def summarize_case(title: str, content: str) -> str:
     """피싱 사례를 고령층 눈높이 메시지로 변환"""
-    client = Groq(api_key=os.environ["GROQ_API_KEY"])
-
-    completion = client.chat.completions.create(
+    completion = _get_client().chat.completions.create(
         model="llama-3.3-70b-versatile",
         temperature=0.3,
         messages=[
@@ -126,12 +123,19 @@ def process_all(input_path: str = "data/raw_cases.json",
     results = []
     for case in cases:
         print(f"  요약 중: {case['title'][:30]}...")
-        summary = summarize_case(case["title"], case.get("content", ""))
-        results.append({
-            "title": case["title"],
-            "date": case.get("date", ""),
-            "summary": summary
-        })
+        try:
+            summary = summarize_case(case["title"], case.get("content", ""))
+            results.append({
+                "title": case["title"],
+                "date": case.get("date", ""),
+                "summary": summary
+            })
+        except Exception as e:
+            print(f"  ⚠️ 요약 실패 ({case['title'][:20]}...): {e}")
+
+    if not results:
+        print("[건너뜀] 요약 성공 건수 없음 → summarized.json 유지")
+        return []
 
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
